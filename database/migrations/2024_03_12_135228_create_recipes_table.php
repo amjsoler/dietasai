@@ -14,18 +14,18 @@ return new class extends Migration
         Schema::create('recipes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('ingredients');
-            $table->string('steps');
-            $table->integer("kcla");
+            $table->text('ingredients');
+            $table->text('steps');
+            $table->integer("kcal")->index();
             $table->integer("protein");
             $table->integer("carbs");
             $table->integer("fat");
-            $table->enum("healthyness", [0, 1, 2]);
-            $table->integer("preparation_time");
-            $table->integer("difficulty");
-            $table->string("allergens");
-            $table->string("food_restrictions");
-            $table->string("day_moment");
+            $table->enum("healthyness", [0, 1, 2])->index();
+            $table->integer("preparation_time")->index();
+            $table->integer("difficulty")->index();
+            $table->string("allergens")->index();
+            $table->string("food_restrictions")->index();
+            $table->string("day_moment")->index();
             $table->timestamps();
         });
     }

@@ -7,5 +7,5 @@ use Illuminate\Support\Facades\Route;
 Route::get("/ingredients",
 [IngredientController::class, "getAllIngredients"]);
 
-Route::get("/get-diet",
+Route::post("/get-diet",
 [RecipeController::class, "getDiet"]);
