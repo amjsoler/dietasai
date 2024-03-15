@@ -103,4 +103,63 @@ class RecipeController extends Controller
 
         return $recipe->first();
     }
+
+    public function createNewRecipeFromChatGPT()
+    {
+        //TODO: Sustituir este JSON por el que se obtenga de la API de OpenAI
+        $receta = '{
+  "nombre": "Pollo al horno con verduras",
+  "ingredientes": [
+    {"nombre": "Pechuga de pollo", "cantidad": 2, "unidades": "piezas"},
+    {"nombre": "Pimiento rojo", "cantidad": 1, "unidades": "unidad"},
+    {"nombre": "Pimiento verde", "cantidad": 1, "unidades": "unidad"},
+    {"nombre": "Cebolla", "cantidad": 1, "unidades": "unidad"},
+    {"nombre": "Calabacín", "cantidad": 1, "unidades": "unidad"},
+    {"nombre": "Aceite de oliva", "cantidad": 2, "unidades": "cucharadas"},
+    {"nombre": "Sal", "cantidad": 1, "unidades": "pizca"},
+    {"nombre": "Pimienta", "cantidad": 1, "unidades": "pizca"},
+    {"nombre": "Tomillo", "cantidad": 1, "unidades": "ramita"}
+  ],
+  "pasos_elaboracion": [
+    "Precalienta el horno a 200°C.",
+    "Corta las pechugas de pollo en trozos medianos y colócalas en una bandeja para hornear.",
+    "Corta los pimientos, la cebolla y el calabacín en tiras y agrégalos a la bandeja junto con el pollo.",
+    "Rocía todo con aceite de oliva y sazona con sal, pimienta y tomillo al gusto.",
+    "Hornea durante 25-30 minutos o hasta que el pollo esté bien cocido y las verduras estén tiernas.",
+    "Sirve caliente y disfruta."
+  ],
+  "kcal": 350,
+  "proteinas": 30,
+  "hidratos": 15,
+  "grasas": 18,
+  "saludable": 2,
+  "tiempo_preparacion": 40,
+  "dificultad": 1,
+  "alergenos": [],
+  "restricciones_alimentarias": ["glutenfree"],
+  "momento_dia": ["cena"]
+}
+';
+
+        $receta = json_decode($receta);
+
+        $recetaModel = new Recipe();
+        $recetaModel->name = $receta->nombre;
+        $recetaModel->ingredients = json_encode($receta->ingredientes);
+        $recetaModel->steps = json_encode($receta->pasos_elaboracion);
+        $recetaModel->kcal = $receta->kcal;
+        $recetaModel->protein = $receta->proteinas;
+        $recetaModel->carbs = $receta->hidratos;
+        $recetaModel->fat = $receta->grasas;
+        $recetaModel->healthyness = $receta->saludable;
+        $recetaModel->preparation_time = $receta->tiempo_preparacion;
+        $recetaModel->difficulty = $receta->dificultad;
+        $recetaModel->allergens = json_encode($receta->alergenos);
+        $recetaModel->food_restrictions = json_encode($receta->restricciones_alimentarias);
+        $recetaModel->day_moment = json_encode($receta->momento_dia);
+
+        $recetaModel->save();
+
+        return $receta;
+    }
 }

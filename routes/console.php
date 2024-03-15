@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
+use App\Console\Commands\CreateRecipeWithChatGPT;
+use App\Jobs\CrearReceta;
 use Illuminate\Support\Facades\Artisan;
 
 /*
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Artisan::command('crear-receta {numRecetas}', function (int $numRecetas) {
+    for($i = 0; $i < $numRecetas; $i++) {
+        CrearReceta::dispatch()->delay(now()->addSeconds(5*$i));
+    }
+
+})->purpose('Genera una nueva receta mediante ChatGPT y la almacena en BD.');
