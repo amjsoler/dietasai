@@ -11,11 +11,9 @@ print_r($pass);
 if($pass !== 'aj4haCmVUsqMj3q@DuYRNHZxbkFA') {
     die('No access!');
 }
-// 3. Navigate to the folder
-print_r("cd .." . shell_exec("cd ../../dietasai" . "\n"));
 
 // 4. php artisan down
-print_r("php artisan down... " . shell_exec("php artisan down" . "\n"));
+print_r("php artisan down... " . shell_exec("php ../../dietasai/artisan down" . "\n"));
 
 // 4.1. php artisan optimize:clear
 print_r("php artisan optimize:clear... " . shell_exec("php artisan optimize:clear" . "\n"));
