@@ -2,13 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Console\Commands\CreateRecipeWithChatGPT;
 use App\Http\Controllers\RecipeController;
+use App\Models\Ingredient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class CrearReceta implements ShouldQueue
 {
@@ -27,8 +28,6 @@ class CrearReceta implements ShouldQueue
      */
     public function handle(): void
     {
-        $recetaCreada = (new RecipeController())->createNewRecipeFromChatGPT();
-
-        //TODO: Regenerar ingredientes
+        (new RecipeController())->createNewRecipeFromChatGPT();
     }
 }

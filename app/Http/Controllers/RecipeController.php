@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GetDietFormRequest;
+use App\Models\Ingredient;
 use App\Models\Recipe;
+use Illuminate\Support\Facades\Log;
 
 class RecipeController extends Controller
 {
@@ -159,6 +161,20 @@ class RecipeController extends Controller
         $recetaModel->day_moment = json_encode($receta->momento_dia);
 
         $recetaModel->save();
+
+        foreach($receta->ingredientes as $ingredient) {
+            //Comprobamos si el ingrediente acual se encuentra en la base de datos
+            $ingredientSelected = Ingredient::where("name", $ingredient->nombre);
+
+            //Si no está lo insertamos
+            if($ingredientSelected->first() == null) {
+                $ingredientSelected = new Ingredient();
+                $ingredientSelected->name = $ingredient->nombre;
+                $ingredientSelected->unit = $ingredient->unidades;
+
+                $ingredientSelected->save();
+            }
+        }
 
         return $receta;
     }
