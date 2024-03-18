@@ -1,6 +1,5 @@
 <?php
 
-use App\Console\Commands\CreateRecipeWithChatGPT;
 use App\Jobs\CrearReceta;
 use Illuminate\Support\Facades\Artisan;
 
