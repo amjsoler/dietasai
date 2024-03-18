@@ -7,5 +7,5 @@ Route::get('/forbidden', function () {
 })->name('forbidden');
 
 Route::get("/test-version", function () {
-    return "Web version is: 1";
+    return "Web version is: 2";
 });
