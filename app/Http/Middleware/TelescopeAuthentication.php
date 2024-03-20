@@ -17,8 +17,8 @@ class TelescopeAuthentication
     public function handle(Request $request, Closure $next): Response
     {
         $pass = $request->get('password');
-dd($pass, Config::get('TELESCOPE_PASS'));
-        if(!$request->wantsJson() && $pass != env('TELESCOPE_PASS')) {
+
+        if(!$request->wantsJson() && $pass !== Config::get('telescope.telescope_pass')) {
             abort(403);
         }
         return $next($request);

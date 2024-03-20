@@ -17,6 +17,7 @@ return [
     |
     */
 
+    'telescope_pass' => env('TELESCOPE_PASS'),
     'domain' => env('TELESCOPE_DOMAIN'),
 
     /*
