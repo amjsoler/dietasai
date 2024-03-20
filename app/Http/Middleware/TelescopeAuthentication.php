@@ -16,11 +16,11 @@ class TelescopeAuthentication
      */
     public function handle(Request $request, Closure $next): Response
     {
+/*
         $pass = $request->get('password');
-
         if(!$request->wantsJson() && $pass !== Config::get('telescope.telescope_pass')) {
             abort(422);
-        }
+        }*/
         return $next($request);
     }
 }
