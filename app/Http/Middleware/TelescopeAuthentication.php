@@ -18,7 +18,7 @@ class TelescopeAuthentication
         $pass = $request->get('password');
 
         if(!$request->wantsJson() && $pass !== env('TELESCOPE_PASS')) {
-            return response('Unauthorized.', 401);
+            abort(403);
         }
         return $next($request);
     }
