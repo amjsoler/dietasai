@@ -19,7 +19,7 @@ class TelescopeAuthentication
         $pass = $request->get('password');
 
         if(!$request->wantsJson() && $pass !== Config::get('telescope.telescope_pass')) {
-            abort(403);
+            abort(422);
         }
         return $next($request);
     }
