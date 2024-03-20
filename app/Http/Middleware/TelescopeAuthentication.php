@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Symfony\Component\HttpFoundation\Response;
 
 class TelescopeAuthentication
@@ -16,7 +17,7 @@ class TelescopeAuthentication
     public function handle(Request $request, Closure $next): Response
     {
         $pass = $request->get('password');
-dd($pass, env('TELESCOPE_PASS'));
+dd($pass, Config::get('TELESCOPE_PASS'));
         if(!$request->wantsJson() && $pass != env('TELESCOPE_PASS')) {
             abort(403);
         }
