@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\GetDietFormRequest;
 use App\Models\Ingredient;
 use App\Models\Recipe;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class RecipeController extends Controller
@@ -108,42 +109,7 @@ class RecipeController extends Controller
 
     public function createNewRecipeFromChatGPT()
     {
-        //TODO: Sustituir este JSON por el que se obtenga de la API de OpenAI
-        $receta = '{
-  "nombre": "Pollo al horno con verduras",
-  "ingredientes": [
-    {"nombre": "Pechuga de pollo", "cantidad": 2, "unidades": "piezas"},
-    {"nombre": "Pimiento rojo", "cantidad": 1, "unidades": "unidad"},
-    {"nombre": "Pimiento verde", "cantidad": 1, "unidades": "unidad"},
-    {"nombre": "Cebolla", "cantidad": 1, "unidades": "unidad"},
-    {"nombre": "Calabacín", "cantidad": 1, "unidades": "unidad"},
-    {"nombre": "Aceite de oliva", "cantidad": 2, "unidades": "cucharadas"},
-    {"nombre": "Sal", "cantidad": 1, "unidades": "pizca"},
-    {"nombre": "Pimienta", "cantidad": 1, "unidades": "pizca"},
-    {"nombre": "Tomillo", "cantidad": 1, "unidades": "ramita"}
-  ],
-  "pasos_elaboracion": [
-    "Precalienta el horno a 200°C.",
-    "Corta las pechugas de pollo en trozos medianos y colócalas en una bandeja para hornear.",
-    "Corta los pimientos, la cebolla y el calabacín en tiras y agrégalos a la bandeja junto con el pollo.",
-    "Rocía todo con aceite de oliva y sazona con sal, pimienta y tomillo al gusto.",
-    "Hornea durante 25-30 minutos o hasta que el pollo esté bien cocido y las verduras estén tiernas.",
-    "Sirve caliente y disfruta."
-  ],
-  "kcal": 350,
-  "proteinas": 30,
-  "hidratos": 15,
-  "grasas": 18,
-  "saludable": 2,
-  "tiempo_preparacion": 40,
-  "dificultad": 1,
-  "alergenos": [],
-  "restricciones_alimentarias": ["glutenfree"],
-  "momento_dia": ["cena"]
-}
-';
-
-        $receta = json_decode($receta);
+        $receta = $this->getRecipeFromGPT();
 
         $recetaModel = new Recipe();
         $recetaModel->name = $receta->nombre;
@@ -177,5 +143,36 @@ class RecipeController extends Controller
         }
 
         return $receta;
+    }
+
+    private function getRecipeFromGPT(){
+        $response = Http::withHeaders([
+            "Authorization" => "Bearer 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",
+        ])
+            ->contentType("application/json")
+            ->withBody('{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "system",
+        "content": "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo"
+      },
+      {
+        "role": "user",
+        "content": "Dame una receta utilizando el timestamp actual a modo de semilla para no repetir. La receta deberá ser un JSON como el siguiente: {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:X,unidades:\"\"}],pasos_elaboracion:[\"\"],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Facil, 2:Dificil*/alergenos:[\"\"],/*Posibles valores:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja*/restricciones_alimentarias:[\"\"],/*Posibles valores:vegetariana,vegana,glutenfree,lacteosfree*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/}"
+      }
+    ]
+  }')
+            ->post('https://api.openai.com/v1/chat/completions');
+
+        $receta = json_decode($response);
+        $receta = $receta->choices[0]->message->content;
+
+        //Quitamos las cadenas del principio y del final
+        $receta = substr($receta, strpos($receta, "```json") + 7);
+
+        $receta = substr($receta, 0, strpos($receta, "```"));
+
+        return json_decode($receta);
     }
 }
