@@ -168,11 +168,6 @@ class RecipeController extends Controller
         $receta = json_decode($response);
         $receta = $receta->choices[0]->message->content;
 
-        //Quitamos las cadenas del principio y del final
-        $receta = substr($receta, strpos($receta, "```json") + 7);
-
-        $receta = substr($receta, 0, strpos($receta, "```"));
-
         return json_decode($receta);
     }
 }
