@@ -111,6 +111,13 @@ class RecipeController extends Controller
     {
         $receta = $this->getRecipeFromGPT();
 
+        $receta = $this->storeRecipe($receta);
+
+        return $receta;
+    }
+
+    public function storeRecipe($receta)
+    {
         $recetaModel = new Recipe();
         $recetaModel->name = $receta->nombre;
         $recetaModel->ingredients = json_encode($receta->ingredientes);
@@ -119,7 +126,7 @@ class RecipeController extends Controller
         $recetaModel->protein = $receta->proteinas;
         $recetaModel->carbs = $receta->hidratos;
         $recetaModel->fat = $receta->grasas;
-        $recetaModel->healthyness = $receta->saludable;
+        $recetaModel->healthyness = "".$receta->saludable;
         $recetaModel->preparation_time = $receta->tiempo_preparacion;
         $recetaModel->difficulty = $receta->dificultad;
         $recetaModel->allergens = json_encode($receta->alergenos);
@@ -142,7 +149,7 @@ class RecipeController extends Controller
             }
         }
 
-        return $receta;
+        return $recetaModel;
     }
 
     private function getRecipeFromGPT(){
@@ -155,7 +162,7 @@ class RecipeController extends Controller
     "messages": [
       {
         "role": "user",
-        "content": "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo. Dame una receta utilizando el timestamp actual a modo de semilla para no repetir. La respuesta deberá ser únicamente un JSON como el siguiente: {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Facil,1:dificultad media,2:Dificil*/alergenos:[\"\"],/*Posibles valores:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja*/restricciones_alimentarias:[\"\"],/*Posibles valores:vegetariana,vegana,glutenfree,lacteosfree*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/}"
+        "content": "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo. Dame una receta utilizando el timestamp actual a modo de semilla para no repetir. La respuesta deberá ser únicamente un JSON válido como el siguiente (sin comentarios): {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Facil,1:dificultad media,2:Dificil*/alergenos:[\"\"],/*Posibles valores:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja*/restricciones_alimentarias:[\"\"],/*Posibles valores:vegetariana,vegana,glutenfree,lacteosfree*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/} Recuerda validar el JSON para que sea correcto y se pueda hacer un json_decode de PHP sin problemas."
       }
     ]
   }')
