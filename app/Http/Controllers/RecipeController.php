@@ -154,12 +154,8 @@ class RecipeController extends Controller
     "model": "gpt-3.5-turbo",
     "messages": [
       {
-        "role": "system",
-        "content": "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo"
-      },
-      {
         "role": "user",
-        "content": "Dame una receta utilizando el timestamp actual a modo de semilla para no repetir. La respuesta deberá ser únicamente un JSON como el siguiente: {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Facil,1:dificultad media,2:Dificil*/alergenos:[\"\"],/*Posibles valores:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja*/restricciones_alimentarias:[\"\"],/*Posibles valores:vegetariana,vegana,glutenfree,lacteosfree*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/}"
+        "content": "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo. Dame una receta utilizando el timestamp actual a modo de semilla para no repetir. La respuesta deberá ser únicamente un JSON como el siguiente: {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Facil,1:dificultad media,2:Dificil*/alergenos:[\"\"],/*Posibles valores:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja*/restricciones_alimentarias:[\"\"],/*Posibles valores:vegetariana,vegana,glutenfree,lacteosfree*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/}"
       }
     ]
   }')
