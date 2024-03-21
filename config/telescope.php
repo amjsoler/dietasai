@@ -16,9 +16,13 @@ return [
     | application. Otherwise, this value will be used as the subdomain.
     |
     */
-
-    'telescope_pass' => env('TELESCOPE_PASS'),
     'domain' => env('TELESCOPE_DOMAIN'),
+
+    //The telescope pass to access the panel
+    'telescope_pass' => env('TELESCOPE_PASS'),
+
+    //The telescope flag to ignore watchers and track everything
+    'telescope_track_all' => env('TELESCOPE_TRACK_ALL', false),
 
     /*
     |--------------------------------------------------------------------------
