@@ -30,6 +30,6 @@ class CrearReceta implements ShouldQueue
      */
     public function handle(): void
     {
-        (new RecipeController())->createNewRecipeFromChatGPT();
+        (new RecipeController())->createNewRecipeFromChatGPT($this->prompt);
     }
 }
