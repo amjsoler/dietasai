@@ -13,7 +13,7 @@ class RecipeController extends Controller
 {
     public function prompt(PromptRequest $request) {
         for($i=0;$i<$request->num_recipes;$i++) {
-            CrearReceta::dispatch($request->context, $request->prompt)->delay(now()->addSeconds(5*$i));
+            CrearReceta::dispatch($request->context, $request->prompt)->delay(now()->addMinutes(5*$i));
         }
 
         return view("prompt", ["result" => "Receta generada correctamente"]);
