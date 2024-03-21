@@ -1,3 +1,7 @@
+@isset($result)
+    <p>{{$result}}</p>
+@endisset
+
 <form action="{{route("postprompt")}}" method="POST">
     {{csrf_field()}}
     <fieldset>

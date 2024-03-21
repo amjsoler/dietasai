@@ -15,6 +15,8 @@ class RecipeController extends Controller
         for($i=0;$i<$request->num_recipes;$i++) {
             CrearReceta::dispatch($request->prompt)->delay(now()->addSeconds(5*$i));
         }
+
+        return view("prompt", ["result" => "Receta generada correctamente"]);
     }
 
     public function getDiet(GetDietFormRequest $request) {
