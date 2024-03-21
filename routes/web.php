@@ -24,3 +24,10 @@ Route::get("/procesar-receta",
             abort(403);
         }
     });
+
+Route::get("/prompt",
+    function() {
+        return view("prompt");
+    })->middleware('telescopeauth')->name("getprompt");
+
+Route::post("/prompt", [RecipeController::class, "prompt"])->middleware('telescopeauth')->name("postprompt");

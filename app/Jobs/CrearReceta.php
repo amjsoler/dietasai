@@ -15,12 +15,14 @@ class CrearReceta implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected $prompt;
+
     /**
      * Create a new job instance.
      */
-    public function __construct()
+    public function __construct($prompt)
     {
-
+        $this->prompt = $prompt;
     }
 
     /**
