@@ -23,42 +23,35 @@ class RecipeController extends Controller
 
         $daysOfTheWeek = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
 
-        $orderedMeals = ["desayuno", "almuerzo", "comida","merienda", "cena"];
+        $importanceMeals = ["comida", "cena", "desayuno", "almuerzo", "merienda"];
 
-        $importanceMeals = ["desayuno", "comida", "cena", "almuerzo", "merienda"];
+        $orderedMeals = ["desayuno", "almuerzo", "comida", "merienda", "cena"];
 
+        //Genero la dieta de cada día de la semana
         foreach($daysOfTheWeek as $day) {
+            $dietaGenerada[$day] = [];
             $kcalAccumulatedDay = 0;
 
-            $dietaGenerada[$day] = [];
-
-            foreach($meals as $meal) {
-                $recipe = $this->getRandomRecipe($request, $meal, $dailyKcal - $kcalAccumulatedDay);
-
-                if(!$recipe) {
-                    $cantGenerateDiet = true;
-                    break;
-                }
-
-                $kcalAccumulatedDay += $recipe->kcal;
-                $dietaGenerada[$day][$meal][] = $recipe;
-            }
-/*
             while($kcalAccumulatedDay < $dailyKcal) {
-                $meal = $orderedMeals[rand(0, 4)];
+                foreach($importanceMeals as $actualMeal) {
+                    if(in_array($actualMeal, $meals)){
+                        $recipe = $this->getRandomRecipe($request, $actualMeal, $dailyKcal - $kcalAccumulatedDay);
 
-                $recipe = $this->getRandomRecipe($request, $meal, $dailyKcal - $kcalAccumulatedDay);
-
-                if(!$recipe) {
-                    $cantGenerateDiet = true;
-                    break;
+                        if($recipe == null) {
+                            $cantGenerateDiet = true;
+                            break;
+                        }else{
+                            $dietaGenerada[$day][$actualMeal][] = $recipe;
+                            $kcalAccumulatedDay += $recipe->kcal;
+                        }
+                    }
                 }
+            }
 
-                $kcalAccumulatedDay += $recipe->kcal;
-                $dietaGenerada[$day][$meal][] = $recipe;
-            }*/
+            //Ordenamos el array resultante en función del momento del día
+            $dietaGenerada[$day] = array_merge(array_flip($orderedMeals), $dietaGenerada[$day]);
+
         }
-
 
         if($cantGenerateDiet) {
             return response()->json(["message" => "No hemos podido generar la dieta con las restricciones proporcionadas. Intenta ser un poco más laxo"], 400);
@@ -102,7 +95,7 @@ class RecipeController extends Controller
 
         }
 
-        $recipe->where("kcal", "<=", $maxKcal);
+        $recipe->where("kcal", "<=", $maxKcal+150)->orWhere("kcal", ">=", $maxKcal-150);
 
         return $recipe->first();
     }
@@ -162,7 +155,7 @@ class RecipeController extends Controller
     "messages": [
       {
         "role": "user",
-        "content": "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo. Dame una receta utilizando el timestamp actual a modo de semilla para no repetir. La respuesta deberá ser únicamente un JSON válido como el siguiente (sin comentarios): {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"/*Sin coma al final del último paso*/],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Fácil,1:dificultad media,2:Difícil*/alergenos:[\"\"],/*Posibles alergenos:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja (Dejar el array vacío si no contiene ninguno de los alergenos anteriores)*/restricciones_alimentarias:[\"\"],/*Posibles restricciones:vegetariana,vegana,glutenfree,lacteosfree (Dejar el array vacío si no cumple ninguna de las restricciones anteriores)*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/} Recuerda validar el JSON para que sea correcto y se pueda hacer un json_decode con él en PHP sin problemas."
+        "content": "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo. Dame una receta para desayunar para los más golosos utilizando el timestamp actual a modo de semilla para no repetir. La respuesta deberá ser únicamente un JSON válido como el siguiente (sin comentarios): {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"/*Sin coma al final del último paso*/],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Fácil,1:dificultad media,2:Difícil*/alergenos:[\"\"],/*Posibles alergenos:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja (Dejar el array vacío si no contiene ninguno de los alergenos anteriores)*/restricciones_alimentarias:[\"\"],/*Posibles restricciones:vegetariana,vegana,glutenfree,lacteosfree (Dejar el array vacío si no cumple ninguna de las restricciones anteriores)*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/} Recuerda validar el JSON para que sea correcto y se pueda hacer un json_decode con él en PHP sin problemas."
       }
     ]
   }')
