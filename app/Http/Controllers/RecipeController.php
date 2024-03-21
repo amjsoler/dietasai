@@ -13,7 +13,7 @@ class RecipeController extends Controller
 {
     public function prompt(PromptRequest $request) {
         for($i=0;$i<$request->num_recipes;$i++) {
-            CrearReceta::dispatch($request->prompt)->delay(now()->addSeconds(5*$i));
+            CrearReceta::dispatch($request->context, $request->prompt)->delay(now()->addSeconds(5*$i));
         }
 
         return view("prompt", ["result" => "Receta generada correctamente"]);
@@ -109,9 +109,9 @@ class RecipeController extends Controller
         return $recipe->first();
     }
 
-    public function createNewRecipeFromChatGPT($prompt = null)
+    public function createNewRecipeFromChatGPT($context = null, $prompt = null)
     {
-        $receta = $this->getRecipeFromGPT($prompt);
+        $receta = $this->getRecipeFromGPT($context, $prompt);
 
         $receta = $this->storeRecipe($receta);
 
@@ -154,7 +154,7 @@ class RecipeController extends Controller
         return $recetaModel;
     }
 
-    private function getRecipeFromGPT($customPrompt = null){
+    private function getRecipeFromGPT($customContext = null, $customPrompt = null){
         $response = Http::withHeaders([
             "Authorization" => "Bearer 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",
         ])
@@ -164,7 +164,7 @@ class RecipeController extends Controller
     "messages": [
       {
         "role": "user",
-        "content": "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo. ' . ($customPrompt ?? "Dame una receta.") . '. Utiliza el timestamp actual para no repetir con las que te haya pedido con anterioridad. La respuesta deberá ser únicamente un JSON válido como el siguiente (sin comentarios): {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"/*Sin coma al final del último paso*/],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Fácil,1:dificultad media,2:Difícil*/alergenos:[\"\"],/*Posibles alergenos:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja (Dejar el array vacío si no contiene ninguno de los alergenos anteriores)*/restricciones_alimentarias:[\"\"],/*Posibles restricciones:vegetariana,vegana,glutenfree,lacteosfree (Dejar el array vacío si no cumple ninguna de las restricciones anteriores)*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/} Recuerda validar el JSON para que sea correcto y se pueda hacer un json_decode con él en PHP sin problemas."
+        "content": "' . ($customContext == "Eres un chef experimentado y sabes miles de recetas que has aprendido durante décadas de trabajo") . '. ' . ($customPrompt ?? "Dame una receta.") . '. La respuesta deberá ser únicamente un JSON válido como el siguiente (sin comentarios): {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"/*Sin coma al final del último paso*/],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Fácil,1:dificultad media,2:Difícil*/alergenos:[\"\"],/*Posibles alergenos:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja (Dejar el array vacío si no contiene ninguno de los alergenos anteriores)*/restricciones_alimentarias:[\"\"],/*Posibles restricciones:vegetariana,vegana,glutenfree,lacteosfree (Dejar el array vacío si no cumple ninguna de las restricciones anteriores)*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/} Recuerda validar el JSON para que sea correcto y se pueda hacer un json_decode con él en PHP sin problemas."
       }
     ]
   }')

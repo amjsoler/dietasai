@@ -15,13 +15,16 @@ class CrearReceta implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected $context;
+
     protected $prompt;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($prompt)
+    public function __construct($context, $prompt)
     {
+        $this->context = $context;
         $this->prompt = $prompt;
     }
 
@@ -30,6 +33,6 @@ class CrearReceta implements ShouldQueue
      */
     public function handle(): void
     {
-        (new RecipeController())->createNewRecipeFromChatGPT($this->prompt);
+        (new RecipeController())->createNewRecipeFromChatGPT($this->context, $this->prompt);
     }
 }

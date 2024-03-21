@@ -22,6 +22,7 @@ class PromptRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "context" => ["required", "string"],
             "prompt" => ["required", "string"],
             "num_recipes" => ["required", "integer"],
         ];
