@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\TelescopeAuthentication;
+use App\Http\Middleware\CookieAuthentication;
 use Laravel\Telescope\Http\Middleware\Authorize;
 use Laravel\Telescope\Watchers;
 
@@ -17,9 +17,6 @@ return [
     |
     */
     'domain' => env('TELESCOPE_DOMAIN'),
-
-    //The telescope pass to access the panel
-    'telescope_pass' => env('TELESCOPE_PASS'),
 
     //The telescope flag to ignore watchers and track everything
     'telescope_track_all' => env('TELESCOPE_TRACK_ALL', false),
@@ -84,7 +81,7 @@ return [
     'middleware' => [
         'web',
         //Authorize::class,
-        TelescopeAuthentication::class
+        CookieAuthentication::class
     ],
 
     /*
