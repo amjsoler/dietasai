@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GetDietFormRequest;
+use App\Http\Requests\PromptRecipeListRequest;
 use App\Http\Requests\PromptRequest;
+use App\Jobs\CrearListadoRecetasJob;
 use App\Jobs\CrearReceta;
+use App\Jobs\CrearRecetaDadoElNombreJob;
 use App\Models\Ingredient;
+use App\Models\ProvisionalRecipe;
 use App\Models\Recipe;
 use Illuminate\Support\Facades\Http;
 
@@ -165,6 +169,106 @@ class RecipeController extends Controller
       {
         "role": "user",
         "content": "' . ($customContext ?? "Eres un chef veterano con décadas de experiencia a tus espaldas y ahora estás aquí para compartir tu conocimiento de más de un millón de recetas") . '. ' . ($customPrompt ?? "Facilítame una receta aleatoria") . '. Utiliza el número '.(now()->getTimestamp()%10000).' a modo de semilla para intentar no repetir la receta. La respuesta deberá ser únicamente un JSON válido como el siguiente (sin comentarios): {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"/*Sin coma al final del último paso*/],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Fácil,1:dificultad media,2:Difícil*/alergenos:[\"\"],/*Posibles alergenos:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja (Dejar el array vacío si no contiene ninguno de los alergenos anteriores)*/restricciones_alimentarias:[\"\"],/*Posibles restricciones:vegetariana,vegana,glutenfree,lacteosfree (Dejar el array vacío si no cumple ninguna de las restricciones anteriores)*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/} Recuerda validar el JSON para que sea correcto y se pueda hacer un json_decode con él en PHP sin problemas."
+      }
+    ]
+  }')
+            ->post('https://api.openai.com/v1/chat/completions');
+
+        $receta = json_decode($response);
+        $receta = $receta->choices[0]->message->content;
+
+        return json_decode($receta);
+    }
+
+    public function promptRecipeList(PromptRecipeListRequest $request)
+    {
+        CrearListadoRecetasJob::dispatch($request->context, $request->prompt, $request->num_recipes);
+
+        return view("prompt-recipe-list", ["result" => "Recetas encoladas correctamente para generación"]);
+    }
+
+    public function createRecipeList($context, $prompt, $numRecetas)
+    {
+        $recetas = $this->getRecipeListFromGPT($context, $prompt, $numRecetas);
+
+        //Buscamos en la tabla de recipes si ya existe alguna de las recetas generadas
+        $existingRecipes = Recipe::whereIn("name", $recetas)->get("name")->toArray();
+
+        //También comprobamos que no se hayan insertado ya en la tabla de provisionales
+        $existingProvisionalRecipes = ProvisionalRecipe::whereIn("name", $recetas)->get("name")->toArray();
+
+        $recetasAInsertar =
+            array_diff(
+                $recetas,
+                array_map(function($item){return $item["name"];}, $existingRecipes),
+                array_map(function($item){return $item["name"];}, $existingProvisionalRecipes)
+            );
+
+        //Recorremos el array resultante y lo insertamos en la tabla de provisional-recipes
+        $dataToInsert = [];
+        foreach($recetasAInsertar as $receta) {
+            $dataToInsert[] = ["name" => $receta];
+        }
+
+        ProvisionalRecipe::insert($dataToInsert);
+
+        return $dataToInsert;
+    }
+    private function getRecipeListFromGPT($customContext, $customPrompt, $numRecipes) {
+        $response = Http::withHeaders([
+            "Authorization" => "Bearer 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",
+        ])
+            ->contentType("application/json")
+            ->withBody('{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "user",
+        "content": "' . ($customContext ?? "Eres un chef veterano con décadas de experiencia a tus espaldas y ahora estás aquí para compartir tu conocimiento de más de un millón de recetas") . '. ' . ($customPrompt ?? "Dame un listado de $numRecipes recetas") . '. Usa el número '.(now()->getTimestamp()%10000).' a modo de semilla para intentar no repetir ninguna receta facilitada en peticiones anteriores. La respuesta deberá ser un Array de cadenas de texto con los nombres de las recetas. Recuerda validar el Array para que sea correcto y tenga un formato tipo [\"Sopa de champiñones\", \"Tarta de queso\", \"Ensalada de pasta\", \"Pollo al curry\", ...]"
+      }
+    ]
+  }')
+            ->post('https://api.openai.com/v1/chat/completions');
+
+        $receta = json_decode($response);
+        $receta = $receta->choices[0]->message->content;
+
+        return json_decode($receta);
+    }
+
+    public function procesarRecetasProvisionales() {
+        //Leer las recetas provisionales disponibles
+        $recetasProvisionales = ProvisionalRecipe::all();
+
+        //Recorrer las recetas provisionales y encolar un job que se encargue de procesar cada una de ellas
+        foreach($recetasProvisionales as $receta) {
+            CrearRecetaDadoElNombreJob::dispatch($receta->name);
+        }
+
+        //Truncar la tabla de recetas provisionales
+        ProvisionalRecipe::truncate();
+    }
+
+    public function crearRecetaDadoNombre($nombre) {
+        $response = $this->getRecipeFromGPTGivenName($nombre);
+
+        $response = $this->storeRecipe($response);
+
+        return response()->json($response, 200);
+    }
+
+    public function getRecipeFromGPTGivenName($nombre)
+    {
+        $response = Http::withHeaders([
+            "Authorization" => "Bearer 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",
+        ])
+            ->contentType("application/json")
+            ->withBody('{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "user",
+        "content": "' . ($customContext ?? "Eres un chef veterano con décadas de experiencia a tus espaldas") . '. Dame la receta completa de: ' . $nombre . '. La respuesta deberá ser únicamente un JSON válido como el siguiente (sin comentarios): {nombre:\"\",ingredientes:[{nombre:\"\",cantidad:\"\",unidades:\"\"}],pasos_elaboracion:[\"\"/*Sin coma al final del último paso*/],kcal:X,proteinas:X,hidratos:X,grasas:X,saludable:enum(0,1,2),/*0:poco saludable,1:equilibrada,2:saludable*/tiempo_preparacion:X,/*Minutos*/dificultad:enum(0,1,2),/*0:Fácil,1:dificultad media,2:Difícil*/alergenos:[\"\"],/*Posibles alergenos:cacahuete,frutossecos,mariscos,pescados,leche,huevos,trigo,soja (Dejar el array vacío si no contiene ninguno de los alergenos anteriores)*/restricciones_alimentarias:[\"\"],/*Posibles restricciones:vegetariana,vegana,glutenfree,lacteosfree (Dejar el array vacío si no cumple ninguna de las restricciones anteriores)*/momento_dia:[\"\"]/*Posibles valores:desayuno,almuerzo,comida,merienda,cena*/} Recuerda validar el JSON para que sea correcto y se pueda hacer un json_decode con él en PHP sin problemas."
       }
     ]
   }')

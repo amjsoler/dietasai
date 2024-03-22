@@ -31,3 +31,14 @@ Route::get("/prompt",
     })->middleware('telescopeauth')->name("getprompt");
 
 Route::post("/prompt", [RecipeController::class, "prompt"])->middleware('telescopeauth')->name("postprompt");
+
+
+
+Route::get("/prompt-recipe-list",
+    function() {
+        return view("prompt-recipe-list");
+    })->middleware('telescopeauth')->name("getpromptrecipelist");
+
+Route::post("/prompt-recipe-list",
+    [RecipeController::class, "promptRecipeList"]
+)->middleware('telescopeauth')->name("postpromptrecipelist");
