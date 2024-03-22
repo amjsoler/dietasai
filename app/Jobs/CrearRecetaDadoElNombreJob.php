@@ -9,6 +9,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Clase que representa un trabajo en cola para crear una receta dado el nombre de la misma
+
+ */
 class CrearRecetaDadoElNombreJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;

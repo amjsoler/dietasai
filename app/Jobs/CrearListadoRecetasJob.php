@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class CrearListadoRecetasJob implements ShouldQueue
 {
@@ -26,6 +27,8 @@ class CrearListadoRecetasJob implements ShouldQueue
 
     public function handle(): void
     {
+        Log::debug("CrearListadoRecetasJob::handle" . json_encode($this->context) . json_encode($this->prompt) . json_encode($this->numRecipes));
+
         (new RecipeController())->createRecipeList($this->context, $this->prompt, $this->numRecipes);
     }
 }
