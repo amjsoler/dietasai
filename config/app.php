@@ -5,6 +5,10 @@ use Illuminate\Support\ServiceProvider;
 
 return [
 
+    'cookie_password' => env('COOKIE_PASSWORD', null),
+
+    'open_ai_token' => env('OPEN_AI_TOKEN', null),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
