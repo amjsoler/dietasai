@@ -176,12 +176,17 @@ class RecipeController extends Controller
 
         //Genero la dieta de cada día de la semana
         foreach($daysOfTheWeek as $day) {
+            Log::debug("Generando dieta para el día: " . $day);
+
             $dietaGenerada[$day] = [];
             $kcalAccumulatedDay = 0;
 
             while($kcalAccumulatedDay < $dailyKcal) {
+                Log::debug("Kcal acumuladas: " . $kcalAccumulatedDay . " en " . $day);
                 foreach($importanceMeals as $actualMeal) {
+                    Log::debug("Generando receta para: " . $actualMeal);
                     if(in_array($actualMeal, $meals)){
+                        Log::debug("La comida está incluida en la dieta: " . $actualMeal);
                         $recipe = $this->getRandomRecipe($request, $actualMeal, $dailyKcal - $kcalAccumulatedDay);
 
                         if($recipe == null) {
@@ -198,6 +203,17 @@ class RecipeController extends Controller
             //Ordenamos el array resultante en función del momento del día
             $dietaGenerada[$day] = array_merge(array_flip($orderedMeals), $dietaGenerada[$day]);
 
+            //Quitamos del array las comidas que no se han incluido en la dieta
+            foreach($dietaGenerada as $dayKey => $day) {
+                Log::debug("Recorriendo cada día");
+                foreach($day as $mealKey => $meal) {
+                    Log::debug("Recorriendo cada comida");
+                    if(!in_array($mealKey, $meals)) {
+                        Log::debug("La comida está incluida en la dieta");
+                        unset($dietaGenerada[$dayKey][$mealKey]);
+                    }
+                }
+            }
         }
 
         if($cantGenerateDiet) {
